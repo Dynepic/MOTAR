@@ -1,0 +1,24 @@
+### Set HOST_IP to the IP of your system that is running docker compose
+HOST_IP=
+MINIO_ROOT_USER=objectStorageUser
+MINIO_ROOT_PASSWORD=objectStoragePassword
+MINIO_PORT=9000
+MINIO_CONSOLE_PORT=9001
+POSTGRES_HOST=postgres
+POSTGRES_DB=motar
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgresPassword
+POSTGRES_MIGRATION_VERSION=141
+MOTAR_PG_PASSWORD=motarPassword
+POSTGRES_DOWNLOAD_BOOL=false
+GITLAB_TOKEN=disabled
+BASE_URL=motarghost.com
+BACKUP_ASSISTANT_URL=http://backup-util:4455
+ASSETS_SERVICE="3000"
+NATS_ADDRESS=nats:4222
+### To use custom certs add your /path/to/cert/dir to the 'TLS_CERT_PATH=' line
+TLS_CERT_PATH=
+SCANNING_BUCKET=motar-quarantine
+CLEAN_BUCKET=motar-clean
+INFECTED_BUCKET=motar-infected

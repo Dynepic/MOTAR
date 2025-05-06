@@ -1,0 +1,49 @@
+# Other secrets
+TOKENCONFIG_auth_secret: abcdefg12345678
+TOKENCONFIG_crypto_iv: abcdefg12345678
+TOKENCONFIG_form_secret: abcdefg12345678
+TOKENCONFIG_sdk_secret: abcdefg12345678
+TOKENCONFIG_secret: abcdefg12345678
+JWTSECRET: abcdefg12345678
+
+# Buckets
+APP_BUCKET: motar-apps
+COURSE_REFERENCE_BUCKET: motar-course-reference
+DOCUMENT_BUCKET: motar-documents
+FILE_BUCKET: motar-files
+LISTING_PACKAGE_BUCKET: motar-listing-packages
+MODEL_BUCKET: motar-models
+SCANNING_BUCKET: motar-quarantine
+VIDEO_BUCKET: motar-videos
+BACKUPTOOL_BACKUP_BUCKET: ${FILE_BUCKET}
+
+# Configs
+ADDONCONFIG_file_scan_enabled: "false"
+ADDONCONFIG_omni: "8189"
+ADDONCONFIG_permissions: "8184"
+EVENT_NAMESPACE: motar
+HUB_STUDIO_BETA_GROUPS: Dynepic
+IS_BETA_SITE: "true"
+MAILCONFIG_report_targets: email@example.com,email2@example.com
+MAILCONFIG_securitytargets: email@example.com,email2@example.com
+NODE_ENV: development
+PG_DB_ENABLE_METRICS_TRACE: "false"
+PLATFORMCONFIG_disable_mfa: "false"
+PLATFORMCONFIG_host_type: cloud
+PLATFORMCONFIG_software_version: 3.0.2
+S3_SOURCE: minio
+SCHEME: https
+SSL_ENABLED: "true"
+USE_AWS_SECRETS: "false"
+USE_POSTGRES_AUTH: "true"
+port: "8080"
+AWS_REGION: us-east-1
+
+# Routes
+ASSETS_URL: http://assets
+BACKUP_ASSISTANT_URL: http://backup-util:4455
+INFRA_API_URL: http://infra-api.motar.svc.cluster.local:4444
+MESSAGING: nats
+MINIO_ENDPOINT: minio
+MINIO_PORT: 9000
+MINIO_CONSOLE_PORT: 9001

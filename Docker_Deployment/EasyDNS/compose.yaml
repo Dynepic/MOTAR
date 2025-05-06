@@ -1,0 +1,648 @@
+name: motar
+networks:
+  motar:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.11.12.0/24
+    name: motar_motar
+services:
+  admin:
+    container_name: admin
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/dynepic/admin:250505-digital-thread-main-21-188465ff
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.admin.rule=Host(`admin.$BASE_URL`)
+      - traefik.http.routers.admin.tls=true
+      - traefik.http.routers.admin.entrypoints=websecure
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "0"
+        target: 8080
+    restart: unless-stopped
+  assets:
+    container_name: assets
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+        required: true
+      object-storage-init:
+        condition: service_completed_successfully
+        required: true
+    dns:
+      - ${HOST_IP}
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      NATS_CONFIG_address: $NATS_ADDRESS
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      PORT: "3000"
+      S3_INTERNAL: minio:9000
+      S3_URL: api-minio.$BASE_URL
+      SCANNING_BUCKET: $SCANNING_BUCKET
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    healthcheck:
+      interval: 5s
+      retries: 15
+      test:
+        - CMD-SHELL
+        - netstat -tulpn | grep -i node
+      timeout: 5s
+    image: harbor.dynepic.net/dynepic/assets:250502-main-41-7a8c995e
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.assets.rule=Host(`assets.$BASE_URL`)
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "0"
+        target: 3000
+    restart: unless-stopped
+  backup-util:
+    container_name: backup-util
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      BACKUPTOOL_ASSETS_SERVICE: http://assets:3000
+      BACKUPTOOL_DB_HOST: ${POSTGRES_HOST}
+      BACKUPTOOL_DB_NAME: ${POSTGRES_DB}
+      BACKUPTOOL_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUPTOOL_DB_PORT: ${POSTGRES_PORT}
+      BACKUPTOOL_DB_USERNAME: ${POSTGRES_USER}
+      BACKUPTOOL_MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      BACKUPTOOL_MINIO_ENDPOINT: api-minio.${BASE_URL}
+      BACKUPTOOL_MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      BACKUPTOOL_MINIO_SECURE: true
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/dynepic/backup-util:0.2.1
+    labels:
+      - traefik.enable=false
+    networks:
+      motar: null
+  clamav:
+    container_name: clamav
+    environment:
+      CLAMD_CONF_LocalSocket: /tmp/clamd.sock
+      CLAMD_CONF_LogFile: /var/log/clamav/clamd.log
+      CLAMD_CONF_StreamMaxLength: 0
+      CLAMD_CONF_TCPSocket: 3310
+      CLAMD_CONF_User: clamav
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/devops/clamav:0.1.0
+    networks:
+      motar: null
+    restart: unless-stopped
+    volumes:
+      - source: clamav_db
+        target: /var/lib/clamav
+        type: volume
+        volume: {}
+  db-init:
+    container_name: db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      MIGRATIONS_APP_USER_PASSWORD: ${MOTAR_PG_PASSWORD}
+      MIGRATIONS_DB_HOST: ${POSTGRES_HOST}
+      MIGRATIONS_DB_NAME: ${POSTGRES_DB}
+      MIGRATIONS_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      MIGRATIONS_DB_PORT: ${POSTGRES_PORT}
+      MIGRATIONS_DB_USERNAME: ${POSTGRES_USER}
+      MIGRATIONS_DOWNLOAD_MIGRATIONS: ${POSTGRES_DOWNLOAD_BOOL}
+      MIGRATIONS_GITLAB_TOKEN: ${GITLAB_TOKEN}
+      MIGRATIONS_MIGRATION_VERSION: ${POSTGRES_MIGRATION_VERSION}
+      S3_URL: api-minio.$BASE_URL
+    healthcheck:
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      test:
+        - CMD-SHELL
+        - /tmp/check-migration.sh
+      timeout: 5s
+    image: harbor.dynepic.net/dynepic/db-init:1.0.16
+    labels:
+      - traefik.enable=false
+    networks:
+      motar: null
+    restart: on-failure
+  devices:
+    container_name: devices
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/dynepic/devices:250421-digital-thread-main-37-0ed88f29
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.devices.rule=Host(`devices.$BASE_URL`)
+      - traefik.http.routers.devices.tls=true
+      - traefik.http.routers.devices.entrypoints=websecure
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "0"
+        target: 8080
+    restart: unless-stopped
+  devices-permissions:
+    container_name: devices-permissions
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+      devices:
+        condition: service_started
+        required: true
+        restart: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+      port: "8184"
+    image: harbor.dynepic.net/dynepic/permissions:250505-digital-thread-main-33-d8376064
+    labels:
+      - traefik.enable=false
+    network_mode: service:devices
+    restart: unless-stopped
+  dnsmasq:
+    cap_add:
+      - NET_ADMIN
+    container_name: dnsmasq
+    env_file:
+      - path: .env
+        required: true
+    image: harbor.dynepic.net/dynepic/dnsmasq:1.0.1
+    labels:
+      - traefik.udp.routers.dnsmasq.entrypoints=dns
+      - traefik.udp.services.dnsmasq.loadbalancer.server.port=53
+      - traefik.enable=true
+    networks:
+      motar:
+        ipv4_address: 10.11.12.13
+    ports:
+      - mode: ingress
+        protocol: udp
+        published: "8053"
+        target: 53
+    restart: unless-stopped
+  hub:
+    container_name: hub
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/dynepic/hub:250421-digital-thread-main-39-9b96aafd
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hub.rule=Host(`hub.$BASE_URL`)
+      - traefik.http.routers.base.rule=Host(`$BASE_URL`)
+      - traefik.http.routers.base.middlewares=redirect-hub
+      - traefik.http.middlewares.redirect-hub.redirectregex.regex=^https://$BASE_URL
+      - traefik.http.middlewares.redirect-hub.redirectregex.replacement=https://hub.$BASE_URL
+      - traefik.http.middlewares.redirect-hub.redirectregex.permanent=true
+      - traefik.http.routers.hub.tls=true
+      - traefik.http.routers.hub.entrypoints=websecure
+      - traefik.http.routers.base.tls=true
+      - traefik.http.routers.base.entrypoints=websecure
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "0"
+        target: 8080
+    restart: unless-stopped
+  hub-permissions:
+    container_name: hub-permissions
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+      hub:
+        condition: service_started
+        required: true
+        restart: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+      port: "8184"
+    image: harbor.dynepic.net/dynepic/permissions:250505-digital-thread-main-33-d8376064
+    labels:
+      - traefik.enable=false
+    network_mode: service:hub
+    restart: unless-stopped
+  login:
+    container_name: login
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/dynepic/login:250424-main-26-8b54b0b0
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.login.rule=Host(`login.$BASE_URL`)
+      - traefik.http.routers.login.tls=true
+      - traefik.http.routers.login.entrypoints=websecure
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "0"
+        target: 8080
+    restart: unless-stopped
+  minio:
+    container_name: minio
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:9000/minio/health/live
+      timeout: 3s
+    image: docker.io/bitnami/minio:2024.8.26
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.minio-api.rule=Host(`api-minio.$BASE_URL`)
+      - traefik.http.routers.minio-api.service=minio-api
+      - traefik.http.services.minio-api.loadbalancer.server.port=9000
+      - traefik.http.routers.minio-console.rule=Host(`console-minio.$BASE_URL`)
+      - traefik.http.routers.minio-console.service=minio-console
+      - traefik.http.services.minio-console.loadbalancer.server.port=9001
+      - traefik.http.routers.minio-api.tls=true
+      - traefik.http.routers.minio-api.entrypoints=websecure
+      - traefik.http.routers.minio-console.tls=true
+      - traefik.http.routers.minio-console.entrypoints=websecure
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "9000"
+        target: 9000
+      - mode: ingress
+        protocol: tcp
+        published: "0"
+        target: 9001
+    restart: unless-stopped
+    volumes:
+      - source: minio_data
+        target: /bitnami/minio/data
+        type: volume
+        volume: {}
+  nats:
+    command:
+      - -js
+    container_name: nats
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: nats:2.10
+    labels:
+      - traefik.enable=false
+    networks:
+      motar: null
+    restart: unless-stopped
+  object-storage-init:
+    container_name: obj-init
+    depends_on:
+      minio:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      CLEAN_BUCKET: $CLEAN_BUCKET
+      INFECTED_BUCKET: $INFECTED_BUCKET
+      NATS_CONFIG_address: $NATS_ADDRESS
+      SCANNING_BUCKET: $SCANNING_BUCKET
+      rootPassword: $MINIO_ROOT_PASSWORD
+      rootUser: $MINIO_ROOT_USER
+    image: harbor.dynepic.net/dynepic/obj-init:1.0.13
+    labels:
+      - traefik.enable=false
+    networks:
+      motar: null
+  postgres:
+    container_name: postgres
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test:
+        - CMD-SHELL
+        - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+      timeout: 3s
+    image: postgres:17.2
+    labels:
+      - traefik.enable=false
+    networks:
+      motar: null
+    restart: unless-stopped
+    volumes:
+      - source: postgres_data
+        target: /var/lib/postgresql/data
+        type: volume
+        volume: {}
+  scanner:
+    container_name: scanner
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+    dns:
+      - ${HOST_IP}
+    environment:
+      SCANNER_ALLOW_EXE_FOR: app
+      SCANNER_CLAMD_ADDRESS: tcp://clamav:3310
+      SCANNER_CLEAN_BUCKET: $CLEAN_BUCKET
+      SCANNER_DOWNLOAD_PATH: /tmp/minio-files
+      SCANNER_EVENT_NAMESPACES: motar
+      SCANNER_INFECTED_BUCKET: $INFECTED_BUCKET
+      SCANNER_MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      SCANNER_MINIO_ENDPOINT: minio:9000
+      SCANNER_MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      SCANNER_NATS_URL: $NATS_ADDRESS
+      SCANNER_QUARANTINE_BUCKET: motar-quarantine
+      SCANNER_SOURCE_BUCKET: $SCANNING_BUCKET
+      SCANNER_STREAM_NAME: EVENTS
+      SCANNER_SUBJECT: events.>
+      SCANNER_USE_SSL: "false"
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/dynepic/scanner:0.4.7
+    labels:
+      - traefik.enable=false
+    networks:
+      motar: null
+    restart: unless-stopped
+  studio:
+    container_name: studio
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+    extra_hosts:
+      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    image: harbor.dynepic.net/dynepic/studio:250418-digital-thread-main-29-7ea37cfc
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.studio.rule=Host(`studio.$BASE_URL`)
+      - traefik.http.routers.studio.tls=true
+      - traefik.http.routers.studio.entrypoints=websecure
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "0"
+        target: 8080
+    restart: unless-stopped
+  studio-permissions:
+    container_name: studio-permissions
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
+      studio:
+        condition: service_started
+        required: true
+        restart: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      ASSETS_SERVICE: $ASSETS_SERVICE
+      AWS_S3_ACCESS_KEY: $MINIO_ROOT_USER
+      AWS_S3_ACCESS_SECRET: $MINIO_ROOT_PASSWORD
+      AWS_S3_ENDPOINT: api-minio.$BASE_URL
+      CONSOLE_ACCESS_KEY: $MINIO_ROOT_USER
+      CONSOLE_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      MINIO_ACCESS_KEY: $MINIO_ROOT_USER
+      MINIO_SECRET_KEY: $MINIO_ROOT_PASSWORD
+      PG_DB_CONNECTION_STRING: postgres://mot_app_user:${MOTAR_PG_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      PG_DB_PASSWORD: ${MOTAR_PG_PASSWORD}
+      PLATFORMCONFIG.base_url: $BASE_URL
+      PLATFORMCONFIG_base_url: $BASE_URL
+      S3_URL: api-minio.$BASE_URL
+      port: "8184"
+    image: harbor.dynepic.net/dynepic/permissions:250505-digital-thread-main-33-d8376064
+    labels:
+      - traefik.enable=false
+    network_mode: service:studio
+  traefik:
+    command:
+      - --api.insecure=true
+      - --providers.docker
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --providers.file.filename=/certs/traefik_dynamic.yml
+      - --entrypoints.dns.address=:53/udp
+    container_name: traefik
+    image: harbor.dynepic.net/dynepic/traefik-cert:1.0.1
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "80"
+        target: 80
+      - mode: ingress
+        protocol: tcp
+        published: "8080"
+        target: 8080
+      - mode: ingress
+        protocol: tcp
+        published: "443"
+        target: 443
+      - 443:443
+      - 8080:8080
+      - ${HOST_IP}:53:53/udp
+    restart: unless-stopped
+    volumes:
+      - bind:
+          create_host_path: true
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        type: bind
+      - source: ${TLS_CERT_PATH}
+        target: /certs/certificates
+        type: volume
+        volume: {}
+volumes:
+  certs-default:
+    name: motar_certs-default
+  clamav_db:
+    name: motar_clamav_db
+  minio_data:
+    driver: local
+    name: motar_minio_data
+  postgres_data:
+    driver: local
+    name: motar_postgres_data
+x-common-hosts:
+  extra_hosts:
+    - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
