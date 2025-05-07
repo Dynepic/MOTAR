@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/94a05b96-b2ee-4d42-9cbc-231928e11331)
+![MOTAR_Full_logo](https://github.com/user-attachments/assets/bf0121b5-6323-4c18-beff-7b7a049608df)
 <br>
 <br>
 <br>
