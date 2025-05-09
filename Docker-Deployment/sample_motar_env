@@ -18,9 +18,11 @@ VIDEO_BUCKET: motar-videos
 BACKUPTOOL_BACKUP_BUCKET: ${FILE_BUCKET}
 
 # Configs
-ADDONCONFIG_file_scan_enabled: "false"
+ADDONCONFIG_file_scan_enabled: "true"
+FILE_SCANNING_ENABLED: ${ADDONCONFIG_file_scan_enabled}
 ADDONCONFIG_omni: "8189"
 ADDONCONFIG_permissions: "8184"
+CREATE_BUCKET: "true"
 EVENT_NAMESPACE: motar
 HUB_STUDIO_BETA_GROUPS: Dynepic
 IS_BETA_SITE: "true"
@@ -32,7 +34,7 @@ PLATFORMCONFIG_disable_mfa: "false"
 PLATFORMCONFIG_host_type: cloud
 PLATFORMCONFIG_software_version: 3.0.2
 S3_SOURCE: minio
-SCHEME: https
+SCHEME: http
 SSL_ENABLED: "true"
 USE_AWS_SECRETS: "false"
 USE_POSTGRES_AUTH: "true"
