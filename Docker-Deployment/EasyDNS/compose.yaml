@@ -86,7 +86,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:250527-main-63-17aaa362
+    image: harbor.dynepic.net/dynepic/assets:250602-main-32-79290876
     labels:
       - traefik.enable=true
       - traefik.http.routers.assets.rule=Host(`assets.$BASE_URL`)
