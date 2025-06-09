@@ -253,7 +253,7 @@ services:
     env_file:
       - path: .env
         required: true
-    image: harbor.dynepic.net/dynepic/dnsmasq:1.0.1
+    image: harbor.dynepic.net/dynepic/dnsmasq:1.0.3
     labels:
       - traefik.udp.routers.dnsmasq.entrypoints=dns
       - traefik.udp.services.dnsmasq.loadbalancer.server.port=53
