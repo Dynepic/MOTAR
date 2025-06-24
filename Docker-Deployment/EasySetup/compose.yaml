@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/admin:250527-digital-thread-main-23-7fd1248a
+    image: harbor.dynepic.net/dynepic/admin:250604-digital-thread-main-23-62ee28c6
     labels:
       - traefik.enable=true
       - traefik.http.routers.admin.rule=Host(`admin.$BASE_URL`)
@@ -84,7 +84,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:250602-main-32-79290876
+    image: harbor.dynepic.net/dynepic/assets:250623-main-31-f1e9cee4
     labels:
       - traefik.enable=true
       - traefik.http.routers.assets.rule=Host(`assets.$BASE_URL`)
@@ -166,7 +166,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.17
+    image: harbor.dynepic.net/dynepic/db-init:1.0.18
     labels:
       - traefik.enable=false
     networks:
@@ -269,7 +269,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/hub:250527-digital-thread-main-24-0cf249cd
+    image: harbor.dynepic.net/dynepic/hub:250617-digital-thread-main-28-5d592e24
     labels:
       - traefik.enable=true
       - traefik.http.routers.hub.rule=Host(`hub.$BASE_URL`)
@@ -521,7 +521,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/studio:250527-digital-thread-main-22-62aca2a5
+    image: harbor.dynepic.net/dynepic/studio:250618-digital-thread-main-21-1e22f85e
     labels:
       - traefik.enable=true
       - traefik.http.routers.studio.rule=Host(`studio.$BASE_URL`)

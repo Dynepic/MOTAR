@@ -32,7 +32,7 @@ NODE_ENV: development
 PG_DB_ENABLE_METRICS_TRACE: "false"
 PLATFORMCONFIG_disable_mfa: "false"
 PLATFORMCONFIG_host_type: cloud
-PLATFORMCONFIG_software_version: 3.1.0
+PLATFORMCONFIG_software_version: 3.1.1
 S3_SOURCE: minio
 SCHEME: http
 SSL_ENABLED: "true"
