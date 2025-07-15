@@ -31,8 +31,8 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/admin:250604-digital-thread-main-23-62ee28c6
+      - api-minio.${BASE_URL}:10.11.12.50
+    image: harbor.dynepic.net/dynepic/admin:250711-digital-thread-main-20-c51485a4
     labels:
       - traefik.enable=true
       - traefik.http.routers.admin.rule=Host(`admin.$BASE_URL`)
@@ -78,7 +78,7 @@ services:
       S3_URL: api-minio.$BASE_URL
       SCANNING_BUCKET: $SCANNING_BUCKET
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+      - api-minio.${BASE_URL}:10.11.12.50
     healthcheck:
       interval: 5s
       retries: 15
@@ -86,7 +86,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:250623-main-31-f1e9cee4
+    image: harbor.dynepic.net/dynepic/assets:250626-main-29-68968778
     labels:
       - traefik.enable=true
       - traefik.http.routers.assets.rule=Host(`assets.$BASE_URL`)
@@ -115,7 +115,7 @@ services:
       BACKUPTOOL_MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       BACKUPTOOL_MINIO_SECURE: true
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+      - api-minio.${BASE_URL}:10.11.12.50
     image: harbor.dynepic.net/dynepic/backup-util:0.2.2-beta
     labels:
       - traefik.enable=false
@@ -130,7 +130,7 @@ services:
       CLAMD_CONF_TCPSocket: 3310
       CLAMD_CONF_User: clamav
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+      - api-minio.${BASE_URL}:10.11.12.50
     image: harbor.dynepic.net/devops/clamav:0.1.0
     networks:
       motar: null
@@ -168,7 +168,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.18
+    image: harbor.dynepic.net/dynepic/db-init:1.0.19
     labels:
       - traefik.enable=false
     networks:
@@ -198,8 +198,8 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/devices:250520-digital-thread-main-45-2bd6b0e5
+      - api-minio.${BASE_URL}:10.11.12.50
+    image: harbor.dynepic.net/dynepic/devices:250703-digital-thread-main-50-c3753180
     labels:
       - traefik.enable=true
       - traefik.http.routers.devices.rule=Host(`devices.$BASE_URL`)
@@ -291,8 +291,8 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/hub:250617-digital-thread-main-28-5d592e24
+      - api-minio.${BASE_URL}:10.11.12.50
+    image: harbor.dynepic.net/dynepic/hub:250710-digital-thread-main-23-004d8c23
     labels:
       - traefik.enable=true
       - traefik.http.routers.hub.rule=Host(`hub.$BASE_URL`)
@@ -370,8 +370,8 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/login:250514-main-22-fd151892
+      - api-minio.${BASE_URL}:10.11.12.50
+    image: harbor.dynepic.net/dynepic/login:250709-main-20-5c2cb538
     labels:
       - traefik.enable=true
       - traefik.http.routers.login.rule=Host(`login.$BASE_URL`)
@@ -437,7 +437,7 @@ services:
       - -js
     container_name: nats
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+      - api-minio.${BASE_URL}:10.11.12.50
     image: nats:2.10
     labels:
       - traefik.enable=false
@@ -514,7 +514,7 @@ services:
       SCANNER_SUBJECT: events.>
       SCANNER_USE_SSL: "false"
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+      - api-minio.${BASE_URL}:10.11.12.50
     image: harbor.dynepic.net/dynepic/scanner:0.4.8-beta
     labels:
       - traefik.enable=false
@@ -545,8 +545,8 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
-      - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
-    image: harbor.dynepic.net/dynepic/studio:250618-digital-thread-main-21-1e22f85e
+      - api-minio.${BASE_URL}:10.11.12.50
+    image: harbor.dynepic.net/dynepic/studio:250703-digital-thread-main-21-835fb90c
     labels:
       - traefik.enable=true
       - traefik.http.routers.studio.rule=Host(`studio.$BASE_URL`)
@@ -604,7 +604,8 @@ services:
     container_name: traefik
     image: harbor.dynepic.net/dynepic/traefik-cert:1.0.2
     networks:
-      motar: null
+      motar:
+        ipv4_address: 10.11.12.50
     ports:
       - mode: ingress
         protocol: tcp
@@ -645,4 +646,4 @@ volumes:
     name: motar_postgres_data
 x-common-hosts:
   extra_hosts:
-    - 'api-minio.${BASE_URL}:${HOST_IP:?Error: HOST_IP is not set in .env file}'
+    - api-minio.${BASE_URL}:10.11.12.50
