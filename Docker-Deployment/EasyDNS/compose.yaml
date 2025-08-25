@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:250711-digital-thread-main-20-c51485a4
+    image: harbor.dynepic.net/dynepic/admin:250821-digital-thread-main-0a42b80e
     labels:
       - traefik.enable=true
       - traefik.http.routers.admin.rule=Host(`admin.$BASE_URL`)
@@ -86,7 +86,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:250626-main-29-68968778
+    image: harbor.dynepic.net/dynepic/assets:250818-main-6f5fc089
     labels:
       - traefik.enable=true
       - traefik.http.routers.assets.rule=Host(`assets.$BASE_URL`)
@@ -168,7 +168,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.19
+    image: harbor.dynepic.net/dynepic/db-init:1.0.21
     labels:
       - traefik.enable=false
     networks:
@@ -199,7 +199,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/devices:250703-digital-thread-main-50-c3753180
+    image: harbor.dynepic.net/dynepic/devices:250821-main-0dfe6e5c
     labels:
       - traefik.enable=true
       - traefik.http.routers.devices.rule=Host(`devices.$BASE_URL`)
@@ -292,7 +292,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/hub:250710-digital-thread-main-23-004d8c23
+    image: harbor.dynepic.net/dynepic/hub:250821-digital-thread-main-7d0b22d4
     labels:
       - traefik.enable=true
       - traefik.http.routers.hub.rule=Host(`hub.$BASE_URL`)
@@ -371,7 +371,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/login:250709-main-20-5c2cb538
+    image: harbor.dynepic.net/dynepic/login:250821-main-868aabdb
     labels:
       - traefik.enable=true
       - traefik.http.routers.login.rule=Host(`login.$BASE_URL`)
@@ -483,6 +483,11 @@ services:
       - traefik.enable=false
     networks:
       motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "5439"
+        target: 5432
     restart: unless-stopped
     volumes:
       - source: postgres_data
@@ -546,7 +551,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/studio:250703-digital-thread-main-21-835fb90c
+    image: harbor.dynepic.net/dynepic/studio:250821-digital-thread-main-cb49900e
     labels:
       - traefik.enable=true
       - traefik.http.routers.studio.rule=Host(`studio.$BASE_URL`)
@@ -629,10 +634,6 @@ services:
         source: /var/run/docker.sock
         target: /var/run/docker.sock
         type: bind
-      - source: ${TLS_CERT_PATH}
-        target: /certs/certificates
-        type: volume
-        volume: {}
 volumes:
   certs-default:
     name: motar_certs-default
