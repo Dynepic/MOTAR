@@ -32,7 +32,8 @@ NODE_ENV: development
 PG_DB_ENABLE_METRICS_TRACE: "false"
 PLATFORMCONFIG_disable_mfa: "false"
 PLATFORMCONFIG_host_type: cloud
-PLATFORMCONFIG_software_version: 3.1.3
+PLATFORMCONFIG_software_version: 3.1.4
+BACKUPTOOL_MOTAR_VERSION: ${PLATFORMCONFIG_software_version}
 S3_SOURCE: minio
 SCHEME: http
 SSL_ENABLED: "true"

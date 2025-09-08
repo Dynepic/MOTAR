@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:250821-digital-thread-main-0a42b80e
+    image: harbor.dynepic.net/dynepic/admin:250905-main-ec4f7c3c
     labels:
       - traefik.enable=true
       - traefik.http.routers.admin.rule=Host(`admin.$BASE_URL`)
@@ -84,7 +84,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:250818-main-6f5fc089
+    image: harbor.dynepic.net/dynepic/assets:250903-main-282d1ae9
     labels:
       - traefik.enable=true
       - traefik.http.routers.assets.rule=Host(`assets.$BASE_URL`)
@@ -98,6 +98,10 @@ services:
     restart: unless-stopped
   backup-util:
     container_name: backup-util
+    depends_on:
+      assets:
+        condition: service_healthy
+        required: true
     env_file:
       - path: motar.env
         required: true
@@ -114,7 +118,14 @@ services:
       BACKUPTOOL_MINIO_SECURE: true
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/backup-util:0.2.2-beta
+    healthcheck:
+      interval: 5s
+      retries: 15
+      test:
+        - CMD-SHELL
+        - curl localhost:4455/status
+      timeout: 5s
+    image: harbor.dynepic.net/dynepic/motar-util:0.3.1-eta
     labels:
       - traefik.enable=false
     networks:
@@ -166,7 +177,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.21
+    image: harbor.dynepic.net/dynepic/db-init:1.0.22
     labels:
       - traefik.enable=false
     networks:
@@ -197,7 +208,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/devices:250821-main-0dfe6e5c
+    image: harbor.dynepic.net/dynepic/devices:250904-digital-thread-main-3d6272df
     labels:
       - traefik.enable=true
       - traefik.http.routers.devices.rule=Host(`devices.$BASE_URL`)
@@ -269,7 +280,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/hub:250821-digital-thread-main-7d0b22d4
+    image: harbor.dynepic.net/dynepic/hub:250828-main-0476f0ec
     labels:
       - traefik.enable=true
       - traefik.http.routers.hub.rule=Host(`hub.$BASE_URL`)
@@ -348,7 +359,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/login:250821-main-868aabdb
+    image: harbor.dynepic.net/dynepic/login:250904-main-aa7e0e1d
     labels:
       - traefik.enable=true
       - traefik.http.routers.login.rule=Host(`login.$BASE_URL`)
@@ -501,6 +512,30 @@ services:
     networks:
       motar: null
     restart: unless-stopped
+  service-checker:
+    command:
+      - sh
+      - -c
+      - scripts/check-apk.sh
+    container_name: service-checker
+    depends_on:
+      backup-util:
+        condition: service_healthy
+        required: true
+    env_file:
+      - path: motar.env
+        required: true
+    environment:
+      BASE_URL: $BASE_URL
+      UPDATE_URL: ${BACKUP_ASSISTANT_URL}/motar3d/update
+    extra_hosts:
+      - api-minio.${BASE_URL}:10.11.12.50
+    image: harbor.dynepic.net/devops/full-checker:0.1.1-beta
+    labels:
+      - traefik.enable=false
+    networks:
+      motar: null
+    restart: "no"
   studio:
     container_name: studio
     depends_on:
@@ -526,7 +561,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/studio:250821-digital-thread-main-cb49900e
+    image: harbor.dynepic.net/dynepic/studio:250827-digital-thread-main-65c8f8ae
     labels:
       - traefik.enable=true
       - traefik.http.routers.studio.rule=Host(`studio.$BASE_URL`)
