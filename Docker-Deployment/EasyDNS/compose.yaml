@@ -413,7 +413,7 @@ services:
         - -f
         - http://localhost:9000/minio/health/live
       timeout: 3s
-    image: docker.io/bitnami/minio:2024.8.26
+    image: docker.io/bitnamilegacy/minio:2024.8.26
     labels:
       - traefik.enable=true
       - traefik.http.routers.minio-api.rule=Host(`api-minio.$BASE_URL`)
