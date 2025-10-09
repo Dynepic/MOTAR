@@ -656,7 +656,7 @@ services:
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --providers.file.filename=/certs/traefik_dynamic.yml
     container_name: traefik
-    image: harbor.dynepic.net/dynepic/traefik-cert:1.0.2
+    image: harbor.dynepic.net/dynepic/traefik-cert:1.0.3
     networks:
       motar:
         ipv4_address: 10.11.12.50

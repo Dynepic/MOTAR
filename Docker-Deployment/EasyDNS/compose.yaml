@@ -681,7 +681,7 @@ services:
       - --providers.file.filename=/certs/traefik_dynamic.yml
       - --entrypoints.dns.address=:53/udp
     container_name: traefik
-    image: harbor.dynepic.net/dynepic/traefik-cert:1.0.2
+    image: harbor.dynepic.net/dynepic/traefik-cert:1.0.3
     networks:
       motar:
         ipv4_address: 10.11.12.50
