@@ -23,8 +23,8 @@ SCANNING_BUCKET=motar-quarantine
 CLEAN_BUCKET=motar-clean
 INFECTED_BUCKET=motar-infected
 ### AI STUFF
-AI_ENABLED=false
+AI_ENABLED=true
 LLM_API_HOST=http://10.11.12.100:11434
-REDIS_HOST=http://redis:6379
+REDIS_HOST=http://redis
 REDIS_PORT=6379
 REDIS_DB=0

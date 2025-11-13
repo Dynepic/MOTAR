@@ -32,12 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:251002-main-f20bb078
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.admin.rule=Host(`admin.$BASE_URL`)
-      - traefik.http.routers.admin.tls=true
-      - traefik.http.routers.admin.entrypoints=websecure
+    image: harbor.dynepic.net/dynepic/admin:251107-main-12c0e6e2
     networks:
       motar: null
     ports:
@@ -84,10 +79,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:251002-main-236c983f
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.assets.rule=Host(`assets.$BASE_URL`)
+    image: harbor.dynepic.net/dynepic/assets:251107-main-12c0e6e2
     networks:
       motar: null
     ports:
@@ -125,11 +117,12 @@ services:
         - CMD-SHELL
         - curl localhost:4455/status
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/motar-util:0.3.1-eta
+    image: harbor.dynepic.net/dynepic/motar-util:0.3.5-alpha
     labels:
       - traefik.enable=false
     networks:
       motar: null
+    restart: unless-stopped
   clamav:
     container_name: clamav
     environment:
@@ -177,7 +170,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.24
+    image: harbor.dynepic.net/dynepic/db-init:1.0.26
     labels:
       - traefik.enable=false
     networks:
@@ -208,12 +201,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/devices:250925-digital-thread-main-087ac34a
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.devices.rule=Host(`devices.$BASE_URL`)
-      - traefik.http.routers.devices.tls=true
-      - traefik.http.routers.devices.entrypoints=websecure
+    image: harbor.dynepic.net/dynepic/devices:251107-main-12c0e6e2
     networks:
       motar: null
     ports:
@@ -250,7 +238,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:250527-digital-thread-main-21-8764eb50
+    image: harbor.dynepic.net/dynepic/permissions:251105-digital-thread-main-3f9a1cf8
     labels:
       - traefik.enable=false
     network_mode: service:devices
@@ -280,19 +268,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/hub:251002-main-55962127
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.hub.rule=Host(`hub.$BASE_URL`)
-      - traefik.http.routers.base.rule=Host(`$BASE_URL`)
-      - traefik.http.routers.base.middlewares=redirect-hub
-      - traefik.http.middlewares.redirect-hub.redirectregex.regex=^https://$BASE_URL
-      - traefik.http.middlewares.redirect-hub.redirectregex.replacement=https://hub.$BASE_URL
-      - traefik.http.middlewares.redirect-hub.redirectregex.permanent=true
-      - traefik.http.routers.hub.tls=true
-      - traefik.http.routers.hub.entrypoints=websecure
-      - traefik.http.routers.base.tls=true
-      - traefik.http.routers.base.entrypoints=websecure
+    image: harbor.dynepic.net/dynepic/hub:251107-main-12c0e6e2
     networks:
       motar: null
     ports:
@@ -329,7 +305,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:250527-digital-thread-main-21-8764eb50
+    image: harbor.dynepic.net/dynepic/permissions:251105-digital-thread-main-3f9a1cf8
     labels:
       - traefik.enable=false
     network_mode: service:hub
@@ -359,12 +335,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/login:250924-main-e7b029ac
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.login.rule=Host(`login.$BASE_URL`)
-      - traefik.http.routers.login.tls=true
-      - traefik.http.routers.login.entrypoints=websecure
+    image: harbor.dynepic.net/dynepic/login:251107-main-12c0e6e2
     networks:
       motar: null
     ports:
@@ -374,6 +345,7 @@ services:
         target: 8080
     restart: unless-stopped
   minio:
+    command: server /data --console-address ":9001"
     container_name: minio
     env_file:
       - path: motar.env
@@ -390,19 +362,9 @@ services:
         - -f
         - http://localhost:9000/minio/health/live
       timeout: 3s
-    image: docker.io/bitnamilegacy/minio:2025.7.23
+    image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.minio-api.rule=Host(`api-minio.$BASE_URL`)
-      - traefik.http.routers.minio-api.service=minio-api
-      - traefik.http.services.minio-api.loadbalancer.server.port=9000
-      - traefik.http.routers.minio-console.rule=Host(`console-minio.$BASE_URL`)
-      - traefik.http.routers.minio-console.service=minio-console
-      - traefik.http.services.minio-console.loadbalancer.server.port=9001
-      - traefik.http.routers.minio-api.tls=true
-      - traefik.http.routers.minio-api.entrypoints=websecure
-      - traefik.http.routers.minio-console.tls=true
-      - traefik.http.routers.minio-console.entrypoints=websecure
+      - traefik.enable=false
     networks:
       motar: null
     ports:
@@ -417,7 +379,7 @@ services:
     restart: unless-stopped
     volumes:
       - source: minio_data
-        target: /bitnami/minio/data
+        target: /data
         type: volume
         volume: {}
   nats:
@@ -456,7 +418,7 @@ services:
   postgres:
     container_name: postgres
     environment:
-      PGDATA: /var/lib/postgresql/data/pgdata
+      PGDATA: /bitnami/postgresql/data
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
     healthcheck:
@@ -466,20 +428,15 @@ services:
         - CMD-SHELL
         - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
       timeout: 3s
-    image: postgres:17.6
+    image: docker.io/bitnamilegacy/postgresql:17.6.0
     labels:
       - traefik.enable=false
     networks:
       motar: null
-    ports:
-      - mode: ingress
-        protocol: tcp
-        published: "5439"
-        target: 5432
     restart: unless-stopped
     volumes:
       - source: postgres_data
-        target: /var/lib/postgresql/data
+        target: /bitnami/postgresql
         type: volume
         volume: {}
   profile:
@@ -507,12 +464,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/profile:251002-main-a34c8e3a
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.profile.rule=Host(`profile.$BASE_URL`)
-      - traefik.http.routers.profile.tls=true
-      - traefik.http.routers.profile.entrypoints=websecure
+    image: harbor.dynepic.net/dynepic/profile:251107-main-12c0e6e2
     networks:
       motar: null
     ports:
@@ -545,7 +497,7 @@ services:
       SCANNER_USE_SSL: "false"
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/scanner:0.4.8-beta
+    image: harbor.dynepic.net/dynepic/scanner:0.4.9-beta
     labels:
       - traefik.enable=false
     networks:
@@ -600,12 +552,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/studio:251001-digital-thread-main-d4cbfd5b
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.studio.rule=Host(`studio.$BASE_URL`)
-      - traefik.http.routers.studio.tls=true
-      - traefik.http.routers.studio.entrypoints=websecure
+    image: harbor.dynepic.net/dynepic/studio:251107-main-12c0e6e2
     networks:
       motar: null
     ports:
@@ -642,21 +589,21 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:250527-digital-thread-main-21-8764eb50
+    image: harbor.dynepic.net/dynepic/permissions:251105-digital-thread-main-3f9a1cf8
     labels:
       - traefik.enable=false
     network_mode: service:studio
+    restart: unless-stopped
   traefik:
     command:
-      - --api.insecure=true
-      - --providers.docker
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
-      - --entrypoints.web.http.redirections.entryPoint.to=websecure
-      - --entrypoints.web.http.redirections.entryPoint.scheme=https
-      - --providers.file.filename=/certs/traefik_dynamic.yml
+      - sh
+      - -c
+      - |
+        envsubst < /certs/traefik_dynamic.yml.tmpl > /certs/traefik_dynamic.yml && traefik --api.insecure=true --providers.docker=false --providers.file.filename=/certs/traefik_dynamic.yml --entryPoints.websecure.address=:443 --providers.file.watch=true
     container_name: traefik
-    image: harbor.dynepic.net/dynepic/traefik-cert:1.0.3
+    environment:
+      BASE_URL: ${BASE_URL}
+    image: harbor.dynepic.net/dynepic/traefik-cert:1.1.0-beta
     networks:
       motar:
         ipv4_address: 10.11.12.50

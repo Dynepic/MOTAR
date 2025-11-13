@@ -50,8 +50,6 @@ services:
       object-storage-init:
         condition: service_completed_successfully
         required: true
-    dns:
-      - ${HOST_IP}
     env_file:
       - path: motar.env
         required: true
@@ -245,27 +243,6 @@ services:
       - traefik.enable=false
     network_mode: service:devices
     restart: unless-stopped
-  dnsmasq:
-    cap_add:
-      - NET_ADMIN
-    container_name: dnsmasq
-    env_file:
-      - path: .env
-        required: true
-    image: harbor.dynepic.net/dynepic/dnsmasq:1.0.3
-    labels:
-      - traefik.udp.routers.dnsmasq.entrypoints=dns
-      - traefik.udp.services.dnsmasq.loadbalancer.server.port=53
-      - traefik.enable=true
-    networks:
-      motar:
-        ipv4_address: 10.11.12.13
-    ports:
-      - mode: ingress
-        protocol: udp
-        published: "8053"
-        target: 53
-    restart: unless-stopped
   hub:
     container_name: hub
     depends_on:
@@ -438,6 +415,42 @@ services:
       - traefik.enable=false
     networks:
       motar: null
+  ollama:
+    command:
+      - -c
+      - apt update && apt install curl -y && ollama pull llama3 && ollama serve
+    container_name: ollama
+    entrypoint:
+      - /bin/bash
+    environment:
+      LOG_LEVEL: debug
+      OLLAMA_DEBUG: 1
+      OLLAMA_MODELS: /models
+    healthcheck:
+      interval: 10s
+      retries: 6
+      start_period: 10s
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:11434
+      timeout: 5s
+    image: ollama/ollama:latest
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "11434"
+        target: 11434
+    restart: unless-stopped
+    volumes:
+      - bind:
+          create_host_path: true
+        source: /opt/ollama-models
+        target: /models
+        type: bind
   postgres:
     container_name: postgres
     environment:
@@ -496,14 +509,50 @@ services:
         published: "0"
         target: 8080
     restart: unless-stopped
+  query-server:
+    container_name: query-server
+    depends_on:
+      ollama:
+        condition: service_healthy
+        required: true
+    environment:
+      LLM_API_HOST: ${LLM_API_HOST}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      PG_DBNAME: ${POSTGRES_DB}
+      PG_HOST: ${POSTGRES_HOST}
+      PG_PASS: ${POSTGRES_PASSWORD}
+      PG_PORT: ${POSTGRES_PORT}
+      PG_USER: ${POSTGRES_USER}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    image: harbor.dynepic.net/dynepic/query-server:0.0.1
+    networks:
+      motar: null
+    ports:
+      - mode: ingress
+        protocol: tcp
+        published: "8000"
+        target: 8000
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    networks:
+      motar: null
+    restart: unless-stopped
+    volumes:
+      - source: redis_data
+        target: /data
+        type: volume
+        volume: {}
   scanner:
     container_name: scanner
     depends_on:
       assets:
         condition: service_healthy
         required: true
-    dns:
-      - ${HOST_IP}
     environment:
       SCANNER_ALLOW_EXE_FOR: app
       SCANNER_CLAMD_ADDRESS: tcp://clamav:3310
@@ -621,13 +670,10 @@ services:
     restart: unless-stopped
   traefik:
     command:
-      - --api.insecure=true
-      - --providers.docker
-      - --entrypoints.websecure.address=:443
-      - --entrypoints.web.http.redirections.entryPoint.to=websecure
-      - --entrypoints.web.http.redirections.entryPoint.scheme=https
-      - --providers.file.filename=/certs/traefik_dynamic.yml
-      - --entrypoints.dns.address=:53/udp
+      - sh
+      - -c
+      - |
+        envsubst < /certs/traefik_dynamic.yml.tmpl > /certs/traefik_dynamic.yml && traefik --api.insecure=true --providers.docker=false --providers.file.filename=/certs/traefik_dynamic.yml --entryPoints.websecure.address=:443 --providers.file.watch=true
     container_name: traefik
     environment:
       BASE_URL: ${BASE_URL}
@@ -648,9 +694,6 @@ services:
         protocol: tcp
         published: "443"
         target: 443
-      - 443:443
-      - 8080:8080
-      - ${HOST_IP}:53:53/udp
     restart: unless-stopped
     volumes:
       - bind:
@@ -666,9 +709,14 @@ volumes:
   minio_data:
     driver: local
     name: motar_minio_data
+  ollama:
+    name: motar_ollama
   postgres_data:
     driver: local
     name: motar_postgres_data
+  redis_data:
+    driver: local
+    name: motar_redis_data
 x-common-hosts:
   extra_hosts:
     - api-minio.${BASE_URL}:10.11.12.50
