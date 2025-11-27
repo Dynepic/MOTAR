@@ -90,10 +90,6 @@ services:
     restart: unless-stopped
   backup-util:
     container_name: backup-util
-    depends_on:
-      assets:
-        condition: service_healthy
-        required: true
     env_file:
       - path: motar.env
         required: true
@@ -110,13 +106,6 @@ services:
       BACKUPTOOL_MINIO_SECURE: true
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    healthcheck:
-      interval: 5s
-      retries: 15
-      test:
-        - CMD-SHELL
-        - curl localhost:4455/status
-      timeout: 5s
     image: harbor.dynepic.net/dynepic/motar-util:0.3.5-alpha
     labels:
       - traefik.enable=false
@@ -509,10 +498,6 @@ services:
       - -c
       - scripts/check-apk.sh
     container_name: service-checker
-    depends_on:
-      backup-util:
-        condition: service_healthy
-        required: true
     env_file:
       - path: motar.env
         required: true

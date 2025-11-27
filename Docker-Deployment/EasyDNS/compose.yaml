@@ -92,10 +92,6 @@ services:
     restart: unless-stopped
   backup-util:
     container_name: backup-util
-    depends_on:
-      assets:
-        condition: service_healthy
-        required: true
     env_file:
       - path: motar.env
         required: true
@@ -534,10 +530,6 @@ services:
       - -c
       - scripts/check-apk.sh
     container_name: service-checker
-    depends_on:
-      backup-util:
-        condition: service_healthy
-        required: true
     env_file:
       - path: motar.env
         required: true
