@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:251107-main-12c0e6e2
+    image: harbor.dynepic.net/dynepic/admin:251216-main-5fd2e8b6
     networks:
       motar: null
     ports:
@@ -79,7 +79,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:251107-main-12c0e6e2
+    image: harbor.dynepic.net/dynepic/assets:251216-main-5fd2e8b6
     networks:
       motar: null
     ports:
@@ -90,10 +90,6 @@ services:
     restart: unless-stopped
   backup-util:
     container_name: backup-util
-    depends_on:
-      assets:
-        condition: service_healthy
-        required: true
     env_file:
       - path: motar.env
         required: true
@@ -170,7 +166,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.26
+    image: harbor.dynepic.net/dynepic/db-init:1.0.29
     labels:
       - traefik.enable=false
     networks:
@@ -201,7 +197,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/devices:251107-main-12c0e6e2
+    image: harbor.dynepic.net/dynepic/devices:251216-main-5fd2e8b6
     networks:
       motar: null
     ports:
@@ -238,7 +234,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:251105-digital-thread-main-3f9a1cf8
+    image: harbor.dynepic.net/dynepic/permissions:251216-main-5fd2e8b6
     labels:
       - traefik.enable=false
     network_mode: service:devices
@@ -268,7 +264,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/hub:251107-main-12c0e6e2
+    image: harbor.dynepic.net/dynepic/hub:251216-main-5fd2e8b6
     networks:
       motar: null
     ports:
@@ -305,7 +301,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:251105-digital-thread-main-3f9a1cf8
+    image: harbor.dynepic.net/dynepic/permissions:251216-main-5fd2e8b6
     labels:
       - traefik.enable=false
     network_mode: service:hub
@@ -335,7 +331,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/login:251107-main-12c0e6e2
+    image: harbor.dynepic.net/dynepic/login:251216-main-5fd2e8b6
     networks:
       motar: null
     ports:
@@ -500,7 +496,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/profile:251107-main-12c0e6e2
+    image: harbor.dynepic.net/dynepic/profile:251216-main-5fd2e8b6
     networks:
       motar: null
     ports:
@@ -528,7 +524,7 @@ services:
       REDIS_DB: ${REDIS_DB}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-    image: harbor.dynepic.net/dynepic/query-server:0.0.1
+    image: harbor.dynepic.net/dynepic/query-server:0.1.0
     networks:
       motar: null
     ports:
@@ -584,7 +580,7 @@ services:
       - scripts/check-apk.sh
     container_name: service-checker
     depends_on:
-      backup-util:
+      assets:
         condition: service_healthy
         required: true
     env_file:
@@ -626,7 +622,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/studio:251107-main-12c0e6e2
+    image: harbor.dynepic.net/dynepic/studio:251216-main-5fd2e8b6
     networks:
       motar: null
     ports:
@@ -663,7 +659,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:251105-digital-thread-main-3f9a1cf8
+    image: harbor.dynepic.net/dynepic/permissions:251216-main-5fd2e8b6
     labels:
       - traefik.enable=false
     network_mode: service:studio
