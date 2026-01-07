@@ -673,7 +673,7 @@ services:
     container_name: traefik
     environment:
       BASE_URL: ${BASE_URL}
-    image: harbor.dynepic.net/dynepic/traefik-cert:1.1.0-beta
+    image: harbor.dynepic.net/dynepic/traefik-cert:1.1.1
     networks:
       motar:
         ipv4_address: 10.11.12.50
