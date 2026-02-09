@@ -623,14 +623,7 @@ services:
         source: /var/run/docker.sock
         target: /var/run/docker.sock
         type: bind
-      - bind:
-          create_host_path: true
-        source: ${TLS_CERT_PATH}
-        target: /certs/certificates
-        type: bind
 volumes:
-  certs-default:
-    name: motar_certs-default
   clamav_db:
     name: motar_clamav_db
   minio_data:
