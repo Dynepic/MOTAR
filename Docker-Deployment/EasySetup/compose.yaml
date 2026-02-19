@@ -624,8 +624,6 @@ services:
         target: /var/run/docker.sock
         type: bind
 volumes:
-  certs-default:
-    name: motar_certs-default
   clamav_db:
     name: motar_clamav_db
   minio_data:
