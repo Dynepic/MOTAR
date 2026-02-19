@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:260120-main-57410d51
+    image: harbor.dynepic.net/dynepic/admin:260218-main-731c72a7
     networks:
       motar: null
     ports:
@@ -79,7 +79,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:260112-main-9d7517fe
+    image: harbor.dynepic.net/dynepic/assets:260218-main-8abd5a76
     networks:
       motar: null
     ports:
@@ -166,7 +166,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.31
+    image: harbor.dynepic.net/dynepic/db-init:1.0.32
     labels:
       - traefik.enable=false
     networks:
@@ -197,7 +197,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/devices:260107-main-78c574cd
+    image: harbor.dynepic.net/dynepic/devices:260218-main-731c72a7
     networks:
       motar: null
     ports:
@@ -234,7 +234,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:260120-main-056c65dd
+    image: harbor.dynepic.net/dynepic/permissions:260212-main-0887ad05
     labels:
       - traefik.enable=false
     network_mode: service:devices
@@ -264,7 +264,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/hub:260122-main-33649224
+    image: harbor.dynepic.net/dynepic/hub:260218-main-731c72a7
     networks:
       motar: null
     ports:
@@ -301,7 +301,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:260120-main-056c65dd
+    image: harbor.dynepic.net/dynepic/permissions:260212-main-0887ad05
     labels:
       - traefik.enable=false
     network_mode: service:hub
@@ -331,7 +331,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/login:260107-main-78c574cd
+    image: harbor.dynepic.net/dynepic/login:260218-main-731c72a7
     networks:
       motar: null
     ports:
@@ -406,7 +406,7 @@ services:
       SCANNING_BUCKET: $SCANNING_BUCKET
       rootPassword: $MINIO_ROOT_PASSWORD
       rootUser: $MINIO_ROOT_USER
-    image: harbor.dynepic.net/dynepic/obj-init:1.0.13
+    image: harbor.dynepic.net/dynepic/obj-init:1.1.0
     labels:
       - traefik.enable=false
     networks:
@@ -496,7 +496,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/profile:260107-main-78c574cd
+    image: harbor.dynepic.net/dynepic/profile:260218-main-731c72a7
     networks:
       motar: null
     ports:
@@ -567,7 +567,7 @@ services:
       SCANNER_USE_SSL: "false"
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/scanner:0.4.9-beta
+    image: harbor.dynepic.net/dynepic/scanner:1.1.0
     labels:
       - traefik.enable=false
     networks:
@@ -622,7 +622,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/studio:260122-main-03243449
+    image: harbor.dynepic.net/dynepic/studio:260218-main-731c72a7
     networks:
       motar: null
     ports:
@@ -659,7 +659,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:260120-main-056c65dd
+    image: harbor.dynepic.net/dynepic/permissions:260212-main-0887ad05
     labels:
       - traefik.enable=false
     network_mode: service:studio
@@ -696,11 +696,6 @@ services:
           create_host_path: true
         source: /var/run/docker.sock
         target: /var/run/docker.sock
-        type: bind
-      - bind:
-          create_host_path: true
-        source: ${TLS_CERT_PATH}
-        target: /certs/certificates
         type: bind
 volumes:
   certs-default:
