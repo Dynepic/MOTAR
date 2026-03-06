@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:260218-main-731c72a7
+    image: harbor.dynepic.net/dynepic/admin:260305-main-521f5b4c
     networks:
       motar: null
     ports:
@@ -79,7 +79,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:260218-main-8abd5a76
+    image: harbor.dynepic.net/dynepic/assets:260305-main-aadd881c
     networks:
       motar: null
     ports:
@@ -166,7 +166,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.32
+    image: harbor.dynepic.net/dynepic/db-init:1.0.33
     labels:
       - traefik.enable=false
     networks:
@@ -624,6 +624,8 @@ services:
         target: /var/run/docker.sock
         type: bind
 volumes:
+  certs-default:
+    name: motar_certs-default
   clamav_db:
     name: motar_clamav_db
   minio_data:
