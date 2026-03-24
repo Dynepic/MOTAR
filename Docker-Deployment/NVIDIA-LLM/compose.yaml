@@ -414,7 +414,7 @@ services:
   ollama:
     command:
       - -c
-      - dpkg --configure -a && apt update && apt install curl -y && sleep 5 && ollama serve & sleep 15 && ollama pull llama3 && pkill ollama && ollama serve
+      - sleep 5 && ollama serve & sleep 15 && ollama pull llama3 && wait
     container_name: ollama
     entrypoint:
       - /bin/bash
@@ -422,14 +422,6 @@ services:
       LOG_LEVEL: debug
       OLLAMA_DEBUG: 1
       OLLAMA_MODELS: /models
-    healthcheck:
-      interval: 10s
-      retries: 60
-      start_period: 15s
-      test:
-        - CMD-SHELL
-        - curl -sf http://localhost:11434/api/tags | grep llama3
-      timeout: 5s
     image: ollama/ollama:latest
     networks:
       motar:
@@ -507,9 +499,6 @@ services:
   query-server:
     container_name: query-server
     depends_on:
-      ollama:
-        condition: service_healthy
-        required: true
       redis:
         condition: service_started
         required: true
@@ -526,7 +515,7 @@ services:
       REDIS_DB: ${REDIS_DB}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-    image: harbor.dynepic.net/dynepic/query-server-gpu:0.1.1
+    image: harbor.dynepic.net/dynepic/query-server-gpu:0.2.0
     networks:
       motar: null
     ports:
