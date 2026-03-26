@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:260305-main-521f5b4c
+    image: harbor.dynepic.net/dynepic/admin:260323-main-e8124737
     networks:
       motar: null
     ports:
@@ -79,7 +79,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:260305-main-aadd881c
+    image: harbor.dynepic.net/dynepic/assets:260323-main-ff6faa97
     networks:
       motar: null
     ports:
@@ -166,7 +166,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.33
+    image: harbor.dynepic.net/dynepic/db-init:1.0.34
     labels:
       - traefik.enable=false
     networks:
@@ -234,7 +234,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:260212-main-0887ad05
+    image: harbor.dynepic.net/dynepic/permissions:260323-main-778ba09b
     labels:
       - traefik.enable=false
     network_mode: service:devices
@@ -264,7 +264,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/hub:260218-main-731c72a7
+    image: harbor.dynepic.net/dynepic/hub:260323-main-ff6faa97
     networks:
       motar: null
     ports:
@@ -301,7 +301,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:260212-main-0887ad05
+    image: harbor.dynepic.net/dynepic/permissions:260323-main-778ba09b
     labels:
       - traefik.enable=false
     network_mode: service:hub
@@ -414,7 +414,7 @@ services:
   ollama:
     command:
       - -c
-      - sleep 5 && ollama serve & sleep 15 && ollama pull llama3 && wait
+      - sleep 5 && ollama serve & sleep 15 && ollama pull llama3 && wait"
     container_name: ollama
     entrypoint:
       - /bin/bash
@@ -487,7 +487,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/profile:260218-main-731c72a7
+    image: harbor.dynepic.net/dynepic/profile:260312-main-77cc782e
     networks:
       motar: null
     ports:
@@ -614,7 +614,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/studio:260218-main-731c72a7
+    image: harbor.dynepic.net/dynepic/studio:260323-main-df73e2ca
     networks:
       motar: null
     ports:
@@ -651,7 +651,7 @@ services:
       PLATFORMCONFIG_base_url: $BASE_URL
       S3_URL: api-minio.$BASE_URL
       port: "8184"
-    image: harbor.dynepic.net/dynepic/permissions:260212-main-0887ad05
+    image: harbor.dynepic.net/dynepic/permissions:260323-main-778ba09b
     labels:
       - traefik.enable=false
     network_mode: service:studio
