@@ -32,7 +32,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/admin:260323-main-e8124737
+    image: harbor.dynepic.net/dynepic/admin:260423-main-d892f023
     networks:
       motar: null
     ports:
@@ -81,7 +81,7 @@ services:
         - CMD-SHELL
         - netstat -tulpn | grep -i node
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/assets:260323-main-ff6faa97
+    image: harbor.dynepic.net/dynepic/assets:260423-main-d892f023
     networks:
       motar: null
     ports:
@@ -168,7 +168,7 @@ services:
         - CMD-SHELL
         - /tmp/check-migration.sh
       timeout: 5s
-    image: harbor.dynepic.net/dynepic/db-init:1.0.34
+    image: harbor.dynepic.net/dynepic/db-init:1.0.36
     labels:
       - traefik.enable=false
     networks:
@@ -199,7 +199,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/devices:260218-main-731c72a7
+    image: harbor.dynepic.net/dynepic/devices:260406-main-2a231c86
     networks:
       motar: null
     ports:
@@ -287,7 +287,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/hub:260323-main-ff6faa97
+    image: harbor.dynepic.net/dynepic/hub:260423-main-287e9274
     networks:
       motar: null
     ports:
@@ -354,7 +354,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/login:260218-main-731c72a7
+    image: harbor.dynepic.net/dynepic/login:260406-main-2a231c86
     networks:
       motar: null
     ports:
@@ -483,7 +483,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/profile:260312-main-77cc782e
+    image: harbor.dynepic.net/dynepic/profile:260406-main-2a231c86
     networks:
       motar: null
     ports:
@@ -573,7 +573,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/studio:260323-main-df73e2ca
+    image: harbor.dynepic.net/dynepic/studio:260420-main-f5db94e4
     networks:
       motar: null
     ports:
@@ -627,7 +627,7 @@ services:
     container_name: traefik
     environment:
       BASE_URL: ${BASE_URL}
-    image: harbor.dynepic.net/dynepic/traefik-cert:1.1.1
+    image: harbor.dynepic.net/dynepic/traefik-cert:1.1.3
     networks:
       motar:
         ipv4_address: 10.11.12.50
