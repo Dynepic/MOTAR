@@ -331,7 +331,7 @@ services:
       S3_URL: api-minio.$BASE_URL
     extra_hosts:
       - api-minio.${BASE_URL}:10.11.12.50
-    image: harbor.dynepic.net/dynepic/login:260406-main-2a231c86
+    image: harbor.dynepic.net/dynepic/login:260428-main-9c5f0e14
     networks:
       motar: null
     ports:
