@@ -414,7 +414,7 @@ services:
   ollama:
     command:
       - -c
-      - sleep 5 && ollama serve & sleep 15 && ollama pull llama3 && wait"
+      - sleep 5 && ollama serve & sleep 15 && ollama pull llama3 && wait
     container_name: ollama
     entrypoint:
       - /bin/bash
