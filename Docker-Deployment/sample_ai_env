@@ -1,3 +1,8 @@
+##############################################################################
+# IMPORTANT: Replace ALL placeholder values below with your actual settings
+# before starting MOTAR. Do not use these example values in production.
+##############################################################################
+
 ### Set HOST_IP to the IP of your system that is running docker compose
 HOST_IP=10.11.12.50
 MINIO_ROOT_USER=objectStorageUser
@@ -9,7 +14,7 @@ POSTGRES_DB=motar
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgresPassword
-POSTGRES_MIGRATION_VERSION=222
+POSTGRES_MIGRATION_VERSION=219
 MOTAR_PG_PASSWORD=motarPassword
 POSTGRES_DOWNLOAD_BOOL=false
 GITLAB_TOKEN=disabled

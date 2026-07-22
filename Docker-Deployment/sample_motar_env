@@ -1,3 +1,9 @@
+##############################################################################
+# IMPORTANT: Replace ALL placeholder values below before deploying.
+# The default secrets (e.g. "abcdefg12345678") are examples only and MUST
+# be changed to strong, unique values in any non-local environment.
+##############################################################################
+
 # Other secrets
 TOKENCONFIG_auth_secret: abcdefg12345678
 TOKENCONFIG_crypto_iv: abcdefg12345678
@@ -32,7 +38,7 @@ NODE_ENV: development
 PG_DB_ENABLE_METRICS_TRACE: "false"
 PLATFORMCONFIG_disable_mfa: "false"
 PLATFORMCONFIG_host_type: cloud
-PLATFORMCONFIG_software_version: 3.2.7
+PLATFORMCONFIG_software_version: 3.2.6
 BACKUPTOOL_MOTAR_VERSION: ${PLATFORMCONFIG_software_version}
 S3_SOURCE: minio
 SCHEME: http
