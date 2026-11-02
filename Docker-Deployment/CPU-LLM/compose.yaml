@@ -450,7 +450,7 @@ services:
         - CMD-SHELL
         - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
       timeout: 3s
-    image: docker.io/bitnamilegacy/postgresql:17.6.0
+    image: docker.io/soldevelo/postgresql:17.6.0
     labels:
       - traefik.enable=false
     networks:
